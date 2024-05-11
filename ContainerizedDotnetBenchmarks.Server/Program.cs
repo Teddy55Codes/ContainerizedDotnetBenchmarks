@@ -48,7 +48,20 @@ public class Program
                     .Zip(_serverPassword, (byteFromRemote, byteFromTruth) => byteFromRemote == byteFromTruth)
                     .All(x => x)) return Results.Unauthorized();
 
-                Console.WriteLine($"{form["instance name"]}: {form["message"]}");
+                if (form["is error"] == "false")
+                {
+                    int remainingBenchmarks;
+                    int totalBenchmarks;
+                    if (!int.TryParse(form["remaining benchmarks"], out remainingBenchmarks)) return Results.BadRequest();
+                    if (!int.TryParse(form["total benchmark count"], out totalBenchmarks)) return Results.BadRequest();
+                    
+                    Console.WriteLine($"{form["instance name"]}: completed {totalBenchmarks-remainingBenchmarks}/{totalBenchmarks} estimated finish at {form["estimated finish"]}");
+                }
+                else
+                {
+                    Console.WriteLine($"ERROR IN INSTANCE {form["instance name"]}: {form["message"]}");
+                }
+                
                 return Results.Ok();
             })
             .WithName("PostStatus")

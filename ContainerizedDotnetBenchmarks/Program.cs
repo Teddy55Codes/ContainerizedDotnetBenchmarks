@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace ContainerizedDotnetBenchmarks;
 
@@ -9,6 +10,7 @@ class Program
     static string _serverAddress;
     static string _instanceName;
     static string _dotnetFramework;
+    static int _benchmarkTotalCount;
     
     static async Task Main(string[] args)
     {
@@ -38,7 +40,7 @@ class Program
         {
             process.StartInfo = startInfo;
 
-            process.OutputDataReceived += SendNonErrorMessage;
+            process.OutputDataReceived += SendMessage;
 
             process.ErrorDataReceived += SendErrorMessage;
 
@@ -51,21 +53,54 @@ class Program
         }
     }
 
-    static async void SendNonErrorMessage(object sender, DataReceivedEventArgs eventArgs) => await SendMessage(eventArgs, false);
-    
-    static async void SendErrorMessage(object sender, DataReceivedEventArgs eventArgs) => await SendMessage(eventArgs, true);
-
-    static async Task SendMessage(DataReceivedEventArgs eventArgs, bool isError)
+    static async void SendMessage(object sender, DataReceivedEventArgs eventArgs)
     {
         var consoleMessage = eventArgs.Data ?? string.Empty;
+
+        if (consoleMessage.StartsWith("// ***** Found "))
+        {
+            _benchmarkTotalCount = int.Parse(Regex.Match(consoleMessage, @"\d+").Value);
+            
+            var initialContent = new Dictionary<string, string>
+            {
+                { "password", _serverPassword },
+                { "instance name", _instanceName },
+                { "message", consoleMessage },
+                { "remaining benchmarks", _benchmarkTotalCount.ToString() },
+                { "estimated finish", "-" },
+                { "total benchmark count", _benchmarkTotalCount.ToString() },
+                { "is error", "false" }
+            };
+            await _httpClient.PostAsync(_serverAddress + "/status", new FormUrlEncodedContent(initialContent));
+            return;
+        }
         if (!consoleMessage.StartsWith("// ** Remained ")) return;
+
+        var remainingBenchmarks = Regex.Match(consoleMessage, @"\d+").Value;
+        var estFinish = Regex.Match(consoleMessage, @"(\d{4}-\d{2}-\d{2} \d{2}:\d{2})").Value;
+        
         
         var content = new Dictionary<string, string>
         {
             { "password", _serverPassword },
             { "instance name", _instanceName },
             { "message", consoleMessage },
-            { "is error", isError ? "true" : "false" }
+            { "remaining benchmarks", remainingBenchmarks },
+            { "estimated finish", estFinish },
+            { "total benchmark count", _benchmarkTotalCount.ToString() },
+            { "is error", "false" }
+        };
+        await _httpClient.PostAsync(_serverAddress + "/status", new FormUrlEncodedContent(content));
+    }
+
+    static async void SendErrorMessage(object sender, DataReceivedEventArgs eventArgs)
+    {
+        var content = new Dictionary<string, string>
+        {
+            { "password", _serverPassword },
+            { "instance name", _instanceName },
+            { "message", eventArgs.Data ?? string.Empty },
+            { "is error", "true"}
         };
         await _httpClient.PostAsync(_serverAddress + "/status", new FormUrlEncodedContent(content));
     }
