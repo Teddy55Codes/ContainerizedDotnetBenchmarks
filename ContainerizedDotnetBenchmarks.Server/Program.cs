@@ -1,9 +1,21 @@
+using System.Security.Cryptography;
+using System.Text;
+
 namespace ContainerizedDotnetBenchmarks.Server;
 
 public class Program
 {
+    private static byte[] _serverPassword;
+    
     public static void Main(string[] args)
     {
+        if (args.Length < 1) _serverPassword = Encoding.Unicode.GetBytes("password12345");
+        else
+        {
+            _serverPassword = SHA256.HashData(Encoding.Unicode.GetBytes(args[0]));
+            args = args[1..];
+        }
+        
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
@@ -25,6 +37,22 @@ public class Program
         app.UseHttpsRedirection();
 
         app.UseAuthorization();
+
+        app.MapPost("/status", async (HttpRequest request) =>
+            {
+                if (!request.HasFormContentType) return Results.BadRequest("Unsupported Media Type");
+                
+                var form = await request.ReadFormAsync();
+                
+                if (SHA256.HashData(Encoding.Unicode.GetBytes(form["password"].ToString()))
+                    .Zip(_serverPassword, (byteFromRemote, byteFromTruth) => byteFromRemote == byteFromTruth)
+                    .All(x => x)) return Results.Unauthorized();
+
+                Console.WriteLine($"{form["instance name"]}: {form["message"]}");
+                return Results.Ok();
+            })
+            .WithName("PostStatus")
+            .WithOpenApi();
 
         app.Run();
     }
