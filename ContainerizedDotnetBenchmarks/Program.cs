@@ -69,7 +69,7 @@ class Program
                 { "instance name", _instanceName },
                 { "message", consoleMessage },
                 { "remaining benchmarks", _benchmarkTotalCount.ToString() },
-                { "estimated finish", "-" },
+                { "estimated finish", string.Empty },
                 { "total benchmark count", _benchmarkTotalCount.ToString() },
                 { "is error", "false" }
             };

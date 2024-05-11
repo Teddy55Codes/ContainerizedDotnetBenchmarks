@@ -53,7 +53,7 @@ public class Program
                     if (!int.TryParse(form["remaining benchmarks"], out remainingBenchmarks)) return Results.BadRequest();
                     if (!int.TryParse(form["total benchmark count"], out totalBenchmarks)) return Results.BadRequest();
                     
-                    Console.WriteLine($"{form["instance name"]}: completed {totalBenchmarks-remainingBenchmarks}/{totalBenchmarks} estimated finish at {form["estimated finish"]}");
+                    Console.WriteLine($"{form["instance name"]}: completed {totalBenchmarks-remainingBenchmarks}/{totalBenchmarks} {(form["estimated finish"].ToString() == string.Empty ? "" : $"estimated finish at {form["estimated finish"]}")}");
                 }
                 else
                 {
