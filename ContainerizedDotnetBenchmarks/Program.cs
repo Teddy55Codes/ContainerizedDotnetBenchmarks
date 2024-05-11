@@ -57,12 +57,14 @@ class Program
 
     static async Task SendMessage(DataReceivedEventArgs eventArgs, bool isError)
     {
-        Console.WriteLine(eventArgs.Data);
+        var consoleMessage = eventArgs.Data ?? string.Empty;
+        if (!consoleMessage.StartsWith("// ** Remained ")) return;
+        
         var content = new Dictionary<string, string>
         {
             { "password", _serverPassword },
             { "instance name", _instanceName },
-            { "message", eventArgs.Data ?? string.Empty },
+            { "message", consoleMessage },
             { "is error", isError ? "true" : "false" }
         };
         await _httpClient.PostAsync(_serverAddress + "/status", new FormUrlEncodedContent(content));
