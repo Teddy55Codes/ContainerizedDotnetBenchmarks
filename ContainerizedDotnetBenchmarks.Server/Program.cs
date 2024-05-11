@@ -9,7 +9,7 @@ public class Program
     
     public static void Main(string[] args)
     {
-        if (args.Length < 1) _serverPassword = Encoding.Unicode.GetBytes("password12345");
+        if (args.Length < 1) _serverPassword = SHA256.HashData(Encoding.Unicode.GetBytes("password12345"));
         else
         {
             _serverPassword = SHA256.HashData(Encoding.Unicode.GetBytes(args[0]));
@@ -43,10 +43,8 @@ public class Program
                 if (!request.HasFormContentType) return Results.BadRequest("Unsupported Media Type");
                 
                 var form = await request.ReadFormAsync();
-                
-                if (SHA256.HashData(Encoding.Unicode.GetBytes(form["password"].ToString()))
-                    .Zip(_serverPassword, (byteFromRemote, byteFromTruth) => byteFromRemote == byteFromTruth)
-                    .All(x => x)) return Results.Unauthorized();
+
+                if (!CheckPassword(form["password"].ToString())) return Results.Unauthorized();
 
                 if (form["is error"] == "false")
                 {
@@ -69,4 +67,9 @@ public class Program
 
         app.Run();
     }
+
+    static bool CheckPassword(string password) =>
+        SHA256.HashData(Encoding.Unicode.GetBytes(password))
+            .Zip(_serverPassword, (byteFromRemote, byteFromTruth) => byteFromRemote == byteFromTruth)
+            .All(x => x);
 }
