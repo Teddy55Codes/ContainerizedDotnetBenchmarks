@@ -64,7 +64,37 @@ public class Program
             })
             .WithName("PostStatus")
             .WithOpenApi();
+        
+        app.MapPost("/results", async (HttpRequest request) =>
+            {
+                if (!request.HasFormContentType) return Results.BadRequest("Unsupported Media Type");
+                
+                var form = await request.ReadFormAsync();
 
+                if (!CheckPassword(form["password"].ToString())) return Results.Unauthorized();
+                
+                if (form.Files["BenchmarkResults"] is { } file)
+                {
+                    var currentTime = DateTime.Now;
+                    var timeDirectory = $"{currentTime.Year}-{currentTime.Month}-{currentTime.Day}-{currentTime.Hour}";
+                    
+                    Directory.CreateDirectory(form["instance name"].ToString());
+                    Directory.CreateDirectory(Path.Combine(form["instance name"].ToString(), timeDirectory));
+                    
+                    var filePath = CheckedSave(Path.Combine(form["instance name"].ToString(), timeDirectory, file.FileName));
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                    
+                    Console.WriteLine($"Received benchmark results from instance {form["instance name"]}. Results are saved under {filePath}.");
+                    return Results.Ok();
+                }
+                return Results.BadRequest();
+            })
+            .WithName("PostResults")
+            .WithOpenApi();
+        
         app.Run();
     }
 
@@ -72,4 +102,22 @@ public class Program
         SHA256.HashData(Encoding.Unicode.GetBytes(password))
             .Zip(_serverPassword, (byteFromRemote, byteFromTruth) => byteFromRemote == byteFromTruth)
             .All(x => x);
+
+    static string CheckedSave(string filePath)
+    {
+        if (!File.Exists(filePath)) return filePath;
+        
+        string newFileName = string.Empty;
+        int i = 1;
+        var newFilenameFound = false;
+        while (!newFilenameFound)
+        {
+            var splitName = filePath.Split(".");
+            newFileName = $"{string.Join(".", splitName[..^1])} {i}.{splitName[^1]}";
+            newFilenameFound = !File.Exists(newFileName);
+            i++;
+        }
+
+        return newFileName;
+    }
 }

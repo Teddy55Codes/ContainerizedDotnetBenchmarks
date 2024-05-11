@@ -1,11 +1,12 @@
 ﻿using System.Diagnostics;
+using System.IO.Compression;
 using System.Text.RegularExpressions;
 
 namespace ContainerizedDotnetBenchmarks;
 
 class Program
 {
-    static HttpClient _httpClient = new();
+    static HttpClient _httpClient = new() { Timeout = TimeSpan.FromMinutes(5) };
     static string _serverPassword;
     static string _serverAddress;
     static string _instanceName;
@@ -14,7 +15,6 @@ class Program
     
     static async Task Main(string[] args)
     {
-        Console.WriteLine(string.Join(", ", args));
         if (args.Length < 5) throw new Exception("Not all arguments where provided.");
         if (!args[0].EndsWith("proj")) throw new Exception("Invalid project path. Path with project file name is required.");
 
@@ -50,6 +50,8 @@ class Program
             process.BeginErrorReadLine();
 
             await process.WaitForExitAsync();
+
+            await SendBenchmarkResults();
         }
     }
 
@@ -103,5 +105,20 @@ class Program
             { "is error", "true"}
         };
         await _httpClient.PostAsync(_serverAddress + "/status", new FormUrlEncodedContent(content));
+    }
+
+    static async Task SendBenchmarkResults()
+    {
+        Stream zipFileStream = new MemoryStream();
+        ZipFile.CreateFromDirectory("BenchmarkDotNet.Artifacts", zipFileStream);
+        
+        using (var multipartFormContent = new MultipartFormDataContent())
+        {
+            multipartFormContent.Add(new StringContent(_serverPassword), name: "password");
+            multipartFormContent.Add(new StringContent(_instanceName), name: "instance name");
+            multipartFormContent.Add(new StreamContent(zipFileStream), name: "BenchmarkResults", fileName: "BenchmarkResults.zip");
+
+            await _httpClient.PostAsync(_serverAddress + "/results", multipartFormContent);
+        }
     }
 }
