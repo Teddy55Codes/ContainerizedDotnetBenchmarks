@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContainerizedDotnetBenchmarks", "ContainerizedDotnetBenchmarks\ContainerizedDotnetBenchmarks.csproj", "{CE18ABB7-C312-4A81-B5D0-7B52FB730118}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContainerizedDotnetBenchmarks.Server", "ContainerizedDotnetBenchmarks.Server\ContainerizedDotnetBenchmarks.Server.csproj", "{ECD1293E-8436-483E-9806-A4FEF11B96F9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{CE18ABB7-C312-4A81-B5D0-7B52FB730118}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE18ABB7-C312-4A81-B5D0-7B52FB730118}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CE18ABB7-C312-4A81-B5D0-7B52FB730118}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECD1293E-8436-483E-9806-A4FEF11B96F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECD1293E-8436-483E-9806-A4FEF11B96F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECD1293E-8436-483E-9806-A4FEF11B96F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECD1293E-8436-483E-9806-A4FEF11B96F9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
