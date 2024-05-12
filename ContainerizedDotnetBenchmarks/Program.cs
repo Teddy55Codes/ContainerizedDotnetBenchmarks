@@ -24,8 +24,7 @@ class Program
         _serverAddress = args[3];
         _serverPassword = args[4];
         
-        
-        // Set up the process start information
+        // start benchmarks
         var startInfo = new ProcessStartInfo
         {
             FileName = "dotnet",
@@ -58,7 +57,8 @@ class Program
     static async void SendMessage(object sender, DataReceivedEventArgs eventArgs)
     {
         var consoleMessage = eventArgs.Data ?? string.Empty;
-
+        Console.WriteLine(consoleMessage);
+        
         if (consoleMessage.StartsWith("// ***** Found "))
         {
             _benchmarkTotalCount = int.Parse(Regex.Match(consoleMessage, @"\d+").Value);
@@ -97,11 +97,14 @@ class Program
 
     static async void SendErrorMessage(object sender, DataReceivedEventArgs eventArgs)
     {
+        var consoleMessage = eventArgs.Data ?? string.Empty;
+        Console.WriteLine(consoleMessage);
+        
         var content = new Dictionary<string, string>
         {
             { "password", _serverPassword },
             { "instance name", _instanceName },
-            { "message", eventArgs.Data ?? string.Empty },
+            { "message", consoleMessage },
             { "is error", "true"}
         };
         await _httpClient.PostAsync(_serverAddress + "/status", new FormUrlEncodedContent(content));
