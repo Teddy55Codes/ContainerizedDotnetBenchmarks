@@ -4,31 +4,41 @@ using System.Text.RegularExpressions;
 
 namespace ContainerizedDotnetBenchmarks;
 
-class Program
+partial class Program
 {
-    static HttpClient _httpClient = new() { Timeout = TimeSpan.FromMinutes(5) };
+    static HttpClient _httpClient = new();
     static string _serverPassword;
     static string _serverAddress;
     static string _instanceName;
-    static string _dotnetFramework;
     static int _benchmarkTotalCount;
     
     static async Task Main(string[] args)
     {
-        if (args.Length < 5) throw new Exception("Not all arguments where provided.");
-        if (!args[0].EndsWith("proj")) throw new Exception("Invalid project path. Path with project file name is required.");
+        if (args.Length < 5) throw new ArgumentException("Not all arguments where provided.");
 
-        var benchmarkProjectPath = args[0];
-        _dotnetFramework = args[1];
+        var benchmarkProjectPaths = args[0].Split(";");
+        if (!benchmarkProjectPaths.All(f => DotnetProjectFile().IsMatch(f))) throw new ArgumentException("One or more invalid project path. Path with project file name is required.");
+        if (!benchmarkProjectPaths.All(File.Exists)) throw new FileNotFoundException("One or more of the provided projects where not found.");
+        
+        var tfmsForBenchmarks = args[1].Split(";");
+        if (benchmarkProjectPaths.Length != tfmsForBenchmarks.Length) throw new ArgumentException("Different amount of projects found and target frameworks provided. supply target frameworks for every project seperated with a semicolons. They need to be sorted in alphabetic order by there project directory name.");
+        
         _instanceName = args[2];
         _serverAddress = args[3];
         _serverPassword = args[4];
         
-        // start benchmarks
+        for (int i = 0; i < benchmarkProjectPaths.Length; i++)
+        {
+            await RunBenchmarkSet(benchmarkProjectPaths[i], tfmsForBenchmarks[i]);
+        }
+    }
+
+    static async Task RunBenchmarkSet(string projectFilePath, string benchmarkTFM)
+    {
         var startInfo = new ProcessStartInfo
         {
             FileName = "dotnet",
-            Arguments = $"run -c Release --framework {_dotnetFramework} --project {Path.Combine("/BenchmarkProj", benchmarkProjectPath)}", 
+            Arguments = $"run -c Release --framework {benchmarkTFM} --project {projectFilePath}", 
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -123,4 +133,7 @@ class Program
             await _httpClient.PostAsync(_serverAddress + "/result", multipartFormContent);
         }
     }
+
+    [GeneratedRegex(@"\..+proj")]
+    private static partial Regex DotnetProjectFile();
 }
