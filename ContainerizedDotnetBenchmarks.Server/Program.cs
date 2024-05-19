@@ -76,7 +76,7 @@ public class Program
                 if (form.Files["BenchmarkResults"] is { } file)
                 {
                     var currentTime = DateTime.Now;
-                    var timeDirectory = $"{currentTime.Year}-{currentTime.Month}-{currentTime.Day}-{currentTime.Hour}";
+                    var timeDirectory = $"{currentTime.Year}-{currentTime.Month}-{currentTime.Day}";
                     Directory.CreateDirectory("BenchmarkResults");
                     Directory.CreateDirectory(Path.Combine("BenchmarkResults", form["instance name"].ToString()));
                     Directory.CreateDirectory(Path.Combine("BenchmarkResults", form["instance name"].ToString(), timeDirectory));
