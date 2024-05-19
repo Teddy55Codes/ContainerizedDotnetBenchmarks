@@ -120,7 +120,7 @@ class Program
             multipartFormContent.Add(new StringContent(_instanceName), name: "instance name");
             multipartFormContent.Add(new StreamContent(File.OpenRead("BenchmarkResults.zip")), name: "BenchmarkResults", fileName: "BenchmarkResults.zip");
 
-            await _httpClient.PostAsync(_serverAddress + "/results", multipartFormContent);
+            await _httpClient.PostAsync(_serverAddress + "/result", multipartFormContent);
         }
     }
 }

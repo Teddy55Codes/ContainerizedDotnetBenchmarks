@@ -65,7 +65,7 @@ public class Program
             .WithName("PostStatus")
             .WithOpenApi();
         
-        app.MapPost("/results", async (HttpRequest request) =>
+        app.MapPost("/result", async (HttpRequest request) =>
             {
                 if (!request.HasFormContentType) return Results.BadRequest("Unsupported Media Type");
                 
@@ -92,7 +92,7 @@ public class Program
                 }
                 return Results.BadRequest();
             })
-            .WithName("PostResults")
+            .WithName("PostResult")
             .WithOpenApi();
         
         app.Run();
