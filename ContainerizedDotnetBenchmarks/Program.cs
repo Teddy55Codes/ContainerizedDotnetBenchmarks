@@ -10,7 +10,9 @@ partial class Program
     static string _serverPassword;
     static string _serverAddress;
     static string _instanceName;
-    static int _benchmarkTotalCount;
+
+    static string _currentProjectName;
+    static int _currentBenchmarkTotalCount;
     
     static async Task Main(string[] args)
     {
@@ -35,6 +37,8 @@ partial class Program
 
     static async Task RunBenchmarkSet(string projectFilePath, string benchmarkTFM)
     {
+        _currentProjectName = string.Join('.', Path.GetFileName(projectFilePath).Split(".")[..^1]);
+
         var startInfo = new ProcessStartInfo
         {
             FileName = "dotnet",
@@ -71,16 +75,17 @@ partial class Program
         
         if (consoleMessage.StartsWith("// ***** Found "))
         {
-            _benchmarkTotalCount = int.Parse(Regex.Match(consoleMessage, @"\d+").Value);
+            _currentBenchmarkTotalCount = int.Parse(Regex.Match(consoleMessage, @"\d+").Value);
             
             var initialContent = new Dictionary<string, string>
             {
                 { "password", _serverPassword },
                 { "instance name", _instanceName },
+                { "benchmark project", _currentProjectName },
                 { "message", consoleMessage },
-                { "remaining benchmarks", _benchmarkTotalCount.ToString() },
+                { "remaining benchmarks", _currentBenchmarkTotalCount.ToString() },
                 { "estimated finish", string.Empty },
-                { "total benchmark count", _benchmarkTotalCount.ToString() },
+                { "total benchmark count", _currentBenchmarkTotalCount.ToString() },
                 { "is error", "false" }
             };
             await _httpClient.PostAsync(_serverAddress + "/status", new FormUrlEncodedContent(initialContent));
@@ -96,10 +101,11 @@ partial class Program
         {
             { "password", _serverPassword },
             { "instance name", _instanceName },
+            { "benchmark project", _currentProjectName },
             { "message", consoleMessage },
             { "remaining benchmarks", remainingBenchmarks },
             { "estimated finish", estFinish },
-            { "total benchmark count", _benchmarkTotalCount.ToString() },
+            { "total benchmark count", _currentBenchmarkTotalCount.ToString() },
             { "is error", "false" }
         };
         await _httpClient.PostAsync(_serverAddress + "/status", new FormUrlEncodedContent(content));

@@ -53,11 +53,11 @@ public class Program
                     if (!int.TryParse(form["remaining benchmarks"], out remainingBenchmarks)) return Results.BadRequest();
                     if (!int.TryParse(form["total benchmark count"], out totalBenchmarks)) return Results.BadRequest();
                     
-                    Console.WriteLine($"{form["instance name"]}: completed {totalBenchmarks-remainingBenchmarks}/{totalBenchmarks} {(form["estimated finish"].ToString() == string.Empty ? "" : $"estimated finish at {form["estimated finish"]}")}");
+                    Console.WriteLine($"instance {form["instance name"]} running {form["benchmark project"]}: completed {totalBenchmarks-remainingBenchmarks}/{totalBenchmarks} {(form["estimated finish"].ToString() == string.Empty ? "" : $"estimated finish at {form["estimated finish"]}")}");
                 }
                 else
                 {
-                    Console.WriteLine($"ERROR IN INSTANCE {form["instance name"]}: {form["message"]}");
+                    Console.WriteLine($"ERROR IN INSTANCE {form["instance name"]} while running {form["benchmark project"]}: {form["message"]}");
                 }
                 
                 return Results.Ok();
@@ -87,7 +87,7 @@ public class Program
                         await file.CopyToAsync(stream);
                     }
                     
-                    Console.WriteLine($"Received benchmark results from instance {form["instance name"]}. Results are saved under {filePath}.");
+                    Console.WriteLine($"Received benchmark results for project {form["benchmark project"]} from instance {form["instance name"]}. Results are saved under {filePath}.");
                     return Results.Ok();
                 }
                 return Results.BadRequest();
