@@ -25,5 +25,5 @@ ENV ServerAddress=http://127.0.0.1:5000
 ENV ServerPassword=password12345
 
 # run
-WORKDIR /app/publish
-ENTRYPOINT dotnet ContainerizedDotnetBenchmarks.dll $BenchmarkProjectPath $DotnetFramework $InstanceName $ServerAddress $ServerPassword
+WORKDIR /BenchmarkProj
+ENTRYPOINT dotnet /app/publish/ContainerizedDotnetBenchmarks.dll $BenchmarkProjectPath $DotnetFramework $InstanceName $ServerAddress $ServerPassword
