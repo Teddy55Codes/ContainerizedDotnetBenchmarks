@@ -112,14 +112,13 @@ class Program
 
     static async Task SendBenchmarkResults()
     {
-        Stream zipFileStream = new MemoryStream();
-        ZipFile.CreateFromDirectory("BenchmarkDotNet.Artifacts", zipFileStream);
+        ZipFile.CreateFromDirectory("BenchmarkDotNet.Artifacts", "BenchmarkResults.zip");
         
         using (var multipartFormContent = new MultipartFormDataContent())
         {
             multipartFormContent.Add(new StringContent(_serverPassword), name: "password");
             multipartFormContent.Add(new StringContent(_instanceName), name: "instance name");
-            multipartFormContent.Add(new StreamContent(zipFileStream), name: "BenchmarkResults", fileName: "BenchmarkResults.zip");
+            multipartFormContent.Add(new StreamContent(File.OpenRead("BenchmarkResults.zip")), name: "BenchmarkResults", fileName: "BenchmarkResults.zip");
 
             await _httpClient.PostAsync(_serverAddress + "/results", multipartFormContent);
         }
