@@ -1,12 +1,11 @@
 ﻿# ContainerizedDotnetBenchmarks
-
 I created this project to make running [BenchmarkDotnet](https://benchmarkdotnet.org/) benchmarks on the cloud easier and less manual.
 
 ## Contents
 This repository contains 2 projects [ContainerizedDotnetBenchmarks (the client)](ContainerizedDotnetBenchmarks) and [ContainerizedDotnetBenchmarks.Server (the server)](ContainerizedDotnetBenchmarks.Server).
 
 > [!NOTE]
-> The 2 projects are in the same solution, but they don't have any dependencies on each other. 
+> The two projects are in the same solution, but they don't have any dependencies on each other. 
 > I put them in the same solution so i don't have to deal with multiple solutions.
 
 ## How To Use
@@ -14,29 +13,29 @@ This repository contains 2 projects [ContainerizedDotnetBenchmarks (the client)]
 ### The Client
 
 #### Build
-First you will need one or more BenchmarkDotnet benchmark projects. put them all in one directory. 
+First you will need one or more BenchmarkDotnet benchmark projects. All of them need to share one parent directory which optimally should not be `/`. (=^ω^=)\
 After that you need to build the docker image. The dockerfile takes the following arguments:
 
 * **BUILD_CONFIGURATION**\
-  This argument controls build configuration of the benchmark runner project. BenchmarkDotnet benchmarks are always built in release mode.
+  This argument controls the build configuration of the benchmark runner project. BenchmarkDotnet benchmarks are always built in release mode.
 * **BenchmarkProjectsParentDirectoryPath**\
-  This is the parent directory which contains all your benchmark projects.
+  This is the parent directory which contains all your benchmark projects. It will be copied into the docker image.
 * **BenchmarkProjectProjectFilePaths**\
-  The file paths to the project files of your benchmarks seperated by semicolons and relative to the directory supplied to BenchmarkProjectsParentDirectoryPath.
+  The file paths to the project files for your benchmarks seperated by semicolons and relative to the directory specified in BenchmarkProjectsParentDirectoryPath.
 * **TFMsForBenchmarkProjects**\
-  The frameworks formatted as [TFMs](https://github.com/dotnet/docs/blob/main/docs/standard/frameworks.md) to run your benchmark project with. 
-  These are also seperated by semicolons. The first in this list is used for the first project supplied to BenchmarkProjectProjectFilePaths and so on.
+  The frameworks formatted as [TFMs](https://github.com/dotnet/docs/blob/main/docs/standard/frameworks.md) to run your benchmark projects with. 
+  These are also seperated by semicolons. The first in this list is used for the first project in BenchmarkProjectProjectFilePaths and so on.
 
 #### Run
-When running the image your have the following environment variables:
+When running the container your have the following environment variables:
 
 * **BenchmarkProjectProjectFilePaths**\
   With this you can override the previously set benchmark projects to run.
 * **TFMsForBenchmarkProjects**\
   With this you can override the previously set frameworks to run your benchmark projects with.
 * **InstanceName**\
-  With this you can name your instance. This name is displayed on the server and used in the save path for the benchmark results. (This means it needs to be a valid folder name on the platform the server is running on.) 
-  This is specially useful when you have multiple instances.
+  With this you can name your instance. This name is displayed on the server and used in the path under which the benchmark results will be saved. (That means it needs to be a valid folder name on the platform the server is running on.) 
+  This is especially useful when you have multiple instances.
 * **ServerAddress**\
   This is the URI to your server.
 * **ServerPassword**\
@@ -73,13 +72,15 @@ sudo docker pull YourDockerHubUserName/YourDockerRepository:YourTag
 sudo docker run -d -e ServerAddress='https://example.com:6969' -e InstanceName='NameToIdentifyThisInstance' --name containerized_dotnet_benchmarks YourDockerHubUserName/YourDockerRepository:YourTag
 ```
 
-To make this script run on startup past it into the [User data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html?icmpid=docs_ec2_console) field.
+To make this script run at startup past it into the [User data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html?icmpid=docs_ec2_console) field.
 
 ![AWS User data example](READMEResources/AWSUserDataExample.png)
 
 Now you can deploy your EC2 instance and your benchmarks should run.
 
 ### The Server
+The server password is set with the first console argument all other arguments are forwarded to ASP.NET web application builder.
+
 The server has the following endpoints:
 
 * **GET /ping**\
