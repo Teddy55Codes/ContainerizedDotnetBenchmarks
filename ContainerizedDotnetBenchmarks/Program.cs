@@ -24,7 +24,7 @@ partial class Program
         if (!benchmarkProjectPaths.All(File.Exists)) throw new FileNotFoundException("One or more of the provided projects where not found.");
         
         var tfmsForBenchmarks = args[1].Split(";");
-        if (benchmarkProjectPaths.Count != tfmsForBenchmarks.Length) throw new ArgumentException("Different amount of projects found and target frameworks provided. supply target frameworks for every project seperated with a semicolons. They need to be sorted in alphabetic order by there project directory name.");
+        if (benchmarkProjectPaths.Count != tfmsForBenchmarks.Length) throw new ArgumentException("Different amount of projects found and target frameworks provided. supply target frameworks for every project seperated with a semicolons.");
         
         _instanceName = args[2];
         _serverAddress = args[3];
