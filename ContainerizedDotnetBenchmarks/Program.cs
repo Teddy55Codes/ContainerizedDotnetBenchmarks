@@ -6,7 +6,7 @@ namespace ContainerizedDotnetBenchmarks;
 
 partial class Program
 {
-    private const int maxRequestRetries = 10;
+    private const int maxRequestRetries = 20;
     static HttpClient _httpClient = new();
     static string _serverPassword;
     static string _serverAddress;
@@ -191,6 +191,7 @@ partial class Program
         {
             multipartFormContent.Add(new StringContent(_serverPassword), name: "password");
             multipartFormContent.Add(new StringContent(_instanceName), name: "instance name");
+            multipartFormContent.Add(new StringContent(_currentProjectName), name: "benchmark project");
             multipartFormContent.Add(new StreamContent(File.OpenRead(zipFilePath)), name: "BenchmarkResults", fileName: "BenchmarkResults.zip");
             
             for (int i = 0; i <= maxRequestRetries; i++)

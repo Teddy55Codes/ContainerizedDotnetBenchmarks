@@ -77,11 +77,9 @@ public class Program
                 {
                     var currentTime = DateTime.Now;
                     var timeDirectory = $"{currentTime.Year}-{currentTime.Month}-{currentTime.Day}";
-                    Directory.CreateDirectory("BenchmarkResults");
-                    Directory.CreateDirectory(Path.Combine("BenchmarkResults", form["instance name"].ToString()));
-                    Directory.CreateDirectory(Path.Combine("BenchmarkResults", form["instance name"].ToString(), timeDirectory));
+                    Directory.CreateDirectory(Path.Combine("BenchmarkResults", form["instance name"].ToString(), form["benchmark project"].ToString(), timeDirectory));
                     
-                    var filePath = CheckedSave(Path.Combine("BenchmarkResults", form["instance name"].ToString(), timeDirectory, file.FileName));
+                    var filePath = CheckedSave(Path.Combine("BenchmarkResults", form["instance name"].ToString(), form["benchmark project"].ToString(), timeDirectory, file.FileName));
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
                         await file.CopyToAsync(stream);
