@@ -5,8 +5,10 @@ I created this project to make running [BenchmarkDotnet](https://benchmarkdotnet
 This repository contains 2 projects [ContainerizedDotnetBenchmarks (the client)](ContainerizedDotnetBenchmarks) and [ContainerizedDotnetBenchmarks.Server (the server)](ContainerizedDotnetBenchmarks.Server).
 
 > [!NOTE]
-> The two projects are in the same solution, but they don't have any dependencies on each other. 
+> The two projects are in the same solution, but they don't have any code dependencies on each other. 
 > I put them in the same solution so i don't have to deal with multiple solutions.
+> 
+> The two projects do still depend on each other tough.
 
 ## How To Use
 
