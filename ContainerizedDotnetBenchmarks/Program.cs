@@ -138,6 +138,8 @@ partial class Program
 
             await _httpClient.PostAsync(_serverAddress + "/result", multipartFormContent);
         }
+        
+        File.Delete("BenchmarkResults.zip");
     }
 
     [GeneratedRegex(@"\..+proj")]
