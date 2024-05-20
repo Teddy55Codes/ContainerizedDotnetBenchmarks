@@ -6,6 +6,7 @@ namespace ContainerizedDotnetBenchmarks;
 
 partial class Program
 {
+    private const int maxRequestRetries = 10;
     static HttpClient _httpClient = new();
     static string _serverPassword;
     static string _serverAddress;
@@ -88,7 +89,18 @@ partial class Program
                 { "total benchmark count", _currentBenchmarkTotalCount.ToString() },
                 { "is error", "false" }
             };
-            await _httpClient.PostAsync(_serverAddress + "/status", new FormUrlEncodedContent(initialContent));
+            for (int i = 0; i <= maxRequestRetries; i++)
+            {
+                try
+                {
+                    await _httpClient.PostAsync(_serverAddress + "/status", new FormUrlEncodedContent(initialContent));
+                    break;
+                }
+                catch (HttpRequestException)
+                {
+                    if (Environment.UserInteractive) Console.WriteLine($"http request failed on try {i+1}/{maxRequestRetries}");
+                }
+            }
             return;
         }
         if (!consoleMessage.StartsWith("// ** Remained ")) return;
@@ -108,7 +120,19 @@ partial class Program
             { "total benchmark count", _currentBenchmarkTotalCount.ToString() },
             { "is error", "false" }
         };
-        await _httpClient.PostAsync(_serverAddress + "/status", new FormUrlEncodedContent(content));
+        
+        for (int i = 0; i <= maxRequestRetries; i++)
+        {
+            try
+            {
+                await _httpClient.PostAsync(_serverAddress + "/status", new FormUrlEncodedContent(content));
+                break;
+            }
+            catch (HttpRequestException)
+            {
+                if (Environment.UserInteractive) Console.WriteLine($"http request failed on try {i+1}/{maxRequestRetries}");
+            }
+        }
     }
 
     static async void SendErrorMessage(object sender, DataReceivedEventArgs eventArgs)
@@ -120,10 +144,23 @@ partial class Program
         {
             { "password", _serverPassword },
             { "instance name", _instanceName },
+            { "benchmark project", _currentProjectName },
             { "message", consoleMessage },
             { "is error", "true"}
         };
-        await _httpClient.PostAsync(_serverAddress + "/status", new FormUrlEncodedContent(content));
+
+        for (int i = 0; i <= maxRequestRetries; i++)
+        {
+            try
+            {
+                await _httpClient.PostAsync(_serverAddress + "/status", new FormUrlEncodedContent(content));
+                break;
+            }
+            catch (HttpRequestException)
+            {
+                if (Environment.UserInteractive) Console.WriteLine($"http request failed on try {i+1}/{maxRequestRetries}");
+            }
+        }
     }
 
     static async Task SendBenchmarkResults()
@@ -135,8 +172,19 @@ partial class Program
             multipartFormContent.Add(new StringContent(_serverPassword), name: "password");
             multipartFormContent.Add(new StringContent(_instanceName), name: "instance name");
             multipartFormContent.Add(new StreamContent(File.OpenRead("BenchmarkResults.zip")), name: "BenchmarkResults", fileName: "BenchmarkResults.zip");
-
-            await _httpClient.PostAsync(_serverAddress + "/result", multipartFormContent);
+            
+            for (int i = 0; i <= maxRequestRetries; i++)
+            {
+                try
+                {
+                    await _httpClient.PostAsync(_serverAddress + "/result", multipartFormContent);
+                    break;
+                }
+                catch (HttpRequestException)
+                {
+                    if (Environment.UserInteractive) Console.WriteLine($"http request failed on try {i+1}/{maxRequestRetries}");
+                }
+            }
         }
         
         File.Delete("BenchmarkResults.zip");
