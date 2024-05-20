@@ -39,7 +39,8 @@ partial class Program
     static async Task RunBenchmarkSet(string projectFilePath, string benchmarkTFM)
     {
         _currentProjectName = string.Join('.', Path.GetFileName(projectFilePath).Split(".")[..^1]);
-
+        var projectDirectory = Path.GetDirectoryName(projectFilePath);
+        
         var startInfoRestore = new ProcessStartInfo
         {
             FileName = "dotnet",
@@ -70,7 +71,7 @@ partial class Program
         using (Process process = new Process())
         {
             process.StartInfo = startInfo;
-            process.StartInfo.WorkingDirectory = Path.GetDirectoryName(projectFilePath);
+            process.StartInfo.WorkingDirectory = projectDirectory;
 
             process.OutputDataReceived += SendMessage;
 
@@ -83,7 +84,7 @@ partial class Program
 
             await process.WaitForExitAsync();
 
-            await SendBenchmarkResults();
+            await SendBenchmarkResults(projectDirectory);
         }
     }
 
@@ -181,15 +182,16 @@ partial class Program
         }
     }
 
-    static async Task SendBenchmarkResults()
+    static async Task SendBenchmarkResults(string projectDirectory)
     {
-        ZipFile.CreateFromDirectory("BenchmarkDotNet.Artifacts", "BenchmarkResults.zip");
+        var zipFilePath = Path.Combine(projectDirectory, "BenchmarkResults.zip");
+        ZipFile.CreateFromDirectory(Path.Combine(projectDirectory, "BenchmarkDotNet.Artifacts"), zipFilePath);
         
         using (var multipartFormContent = new MultipartFormDataContent())
         {
             multipartFormContent.Add(new StringContent(_serverPassword), name: "password");
             multipartFormContent.Add(new StringContent(_instanceName), name: "instance name");
-            multipartFormContent.Add(new StreamContent(File.OpenRead("BenchmarkResults.zip")), name: "BenchmarkResults", fileName: "BenchmarkResults.zip");
+            multipartFormContent.Add(new StreamContent(File.OpenRead(zipFilePath)), name: "BenchmarkResults", fileName: "BenchmarkResults.zip");
             
             for (int i = 0; i <= maxRequestRetries; i++)
             {
@@ -205,7 +207,7 @@ partial class Program
             }
         }
         
-        File.Delete("BenchmarkResults.zip");
+        File.Delete(zipFilePath);
     }
 
     [GeneratedRegex(@"\..+proj")]
