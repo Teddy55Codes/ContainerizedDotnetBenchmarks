@@ -17,29 +17,29 @@ This repository contains 2 projects [ContainerizedDotnetBenchmarks (the client)]
 First you will need one or more BenchmarkDotnet benchmark projects. put them all in one directory. 
 After that you need to build the docker image. The dockerfile takes the following arguments:
 
-* BUILD_CONFIGURATION\
+* **BUILD_CONFIGURATION**\
   This argument controls build configuration of the benchmark runner project. BenchmarkDotnet benchmarks are always built in release mode.
-* BenchmarkProjectsParentDirectoryPath\
+* **BenchmarkProjectsParentDirectoryPath**\
   This is the parent directory which contains all your benchmark projects.
-* BenchmarkProjectProjectFilePaths\
+* **BenchmarkProjectProjectFilePaths**\
   The file paths to the project files of your benchmarks seperated by semicolons and relative to the directory supplied to BenchmarkProjectsParentDirectoryPath.
-* TFMsForBenchmarkProjects\
+* **TFMsForBenchmarkProjects**\
   The frameworks formatted as [TFMs](https://github.com/dotnet/docs/blob/main/docs/standard/frameworks.md) to run your benchmark project with. 
   These are also seperated by semicolons. The first in this list is used for the first project supplied to BenchmarkProjectProjectFilePaths and so on.
 
 #### Run
 When running the image your have the following environment variables:
 
-* BenchmarkProjectProjectFilePaths\
+* **BenchmarkProjectProjectFilePaths**\
   With this you can override the previously set benchmark projects to run.
-* TFMsForBenchmarkProjects\
+* **TFMsForBenchmarkProjects**\
   With this you can override the previously set frameworks to run your benchmark projects with.
-* InstanceName\
+* **InstanceName**\
   With this you can name your instance. This name is displayed on the server and used in the save path for the benchmark results. (This means it needs to be a valid folder name on the platform the server is running on.) 
   This is specially useful when you have multiple instances.
-* ServerAddress\
+* **ServerAddress**\
   This is the URI to your server.
-* ServerPassword\
+* **ServerPassword**\
   This is the password which is used to authenticate with your server.
 
 #### AWS EC2 example
@@ -82,12 +82,12 @@ Now you can deploy your EC2 instance and your benchmarks should run.
 ### The Server
 The server has the following endpoints:
 
-* GET /ping\
+* **GET /ping**\
   This endpoint is for testing if your server is reachable. It is not used by the client. It is just there to make your life a bit easier.
-* POST /status\
+* **POST /status**\
   This endpoint is used to send status updates on the progress of the currently running benchmark.
   These updates are printed to the console. 
-* POST /result\
+* **POST /result**\
   This endpoint is used to receive the benchmarking results. This is also printed to the console.
 
 When a benchmark is finished the client will zip the `BenchmarkDotNet.Artifacts` directory and send it to the /result endpoint.
