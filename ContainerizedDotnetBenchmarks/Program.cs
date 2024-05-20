@@ -71,7 +71,7 @@ partial class Program
     static async void SendMessage(object sender, DataReceivedEventArgs eventArgs)
     {
         var consoleMessage = eventArgs.Data ?? string.Empty;
-        Console.WriteLine(consoleMessage);
+        if (Environment.UserInteractive) Console.WriteLine(consoleMessage);
         
         if (consoleMessage.StartsWith("// ***** Found "))
         {
@@ -114,7 +114,7 @@ partial class Program
     static async void SendErrorMessage(object sender, DataReceivedEventArgs eventArgs)
     {
         var consoleMessage = eventArgs.Data ?? string.Empty;
-        Console.WriteLine(consoleMessage);
+        if (Environment.UserInteractive) Console.WriteLine(consoleMessage);
         
         var content = new Dictionary<string, string>
         {
