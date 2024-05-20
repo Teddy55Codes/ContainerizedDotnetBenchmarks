@@ -99,8 +99,7 @@ public class Program
                 
                 if (form.Files["BenchmarkResults"] is { } file)
                 {
-                    var currentTime = DateTime.Now;
-                    var timeDirectory = $"{currentTime.Year}-{currentTime.Month}-{currentTime.Day}";
+                    var timeDirectory = DateTime.Now.ToString("yyyy-MM-dd");
                     Directory.CreateDirectory(Path.Combine("BenchmarkResults", form["instance name"].ToString(), form["benchmark project"].ToString(), timeDirectory));
                     
                     var filePath = CheckedSave(Path.Combine("BenchmarkResults", form["instance name"].ToString(), form["benchmark project"].ToString(), timeDirectory, file.FileName));
