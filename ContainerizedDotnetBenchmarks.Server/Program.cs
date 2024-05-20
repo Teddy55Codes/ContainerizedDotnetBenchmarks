@@ -38,6 +38,8 @@ public class Program
 
         app.UseAuthorization();
 
+        app.MapGet("/ping", (HttpRequest _) => Results.Ok("pong"));
+        
         app.MapPost("/status", async (HttpRequest request) =>
             {
                 if (!request.HasFormContentType) return Results.BadRequest("Unsupported Media Type");
