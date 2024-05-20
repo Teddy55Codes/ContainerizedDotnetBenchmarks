@@ -40,6 +40,23 @@ partial class Program
     {
         _currentProjectName = string.Join('.', Path.GetFileName(projectFilePath).Split(".")[..^1]);
 
+        var startInfoRestore = new ProcessStartInfo
+        {
+            FileName = "dotnet",
+            Arguments = $"restore {projectFilePath}", 
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true
+        };
+
+        using (Process process = new Process())
+        {
+            process.StartInfo = startInfoRestore;
+            process.Start();
+            await process.WaitForExitAsync();
+        }
+
         var startInfo = new ProcessStartInfo
         {
             FileName = "dotnet",
