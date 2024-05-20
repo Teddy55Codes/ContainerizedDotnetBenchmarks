@@ -70,6 +70,7 @@ partial class Program
         using (Process process = new Process())
         {
             process.StartInfo = startInfo;
+            process.StartInfo.WorkingDirectory = Path.GetDirectoryName(projectFilePath);
 
             process.OutputDataReceived += SendMessage;
 
