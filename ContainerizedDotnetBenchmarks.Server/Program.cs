@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using NLog.Web;
 
 namespace ContainerizedDotnetBenchmarks.Server;
 
@@ -24,6 +25,10 @@ public class Program
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+        
+        // NLog: Setup NLog for Dependency injection
+        builder.Logging.ClearProviders();
+        builder.Host.UseNLog();
 
         var app = builder.Build();
 
@@ -38,28 +43,37 @@ public class Program
 
         app.UseAuthorization();
 
-        app.MapGet("/ping", (HttpRequest _) => Results.Ok("pong"));
+        app.MapGet("/ping", (HttpRequest _) =>
+            {
+                app.Logger.LogInformation("Received Ping");
+                return Results.Ok("pong");
+            });
         
         app.MapPost("/status", async (HttpRequest request) =>
             {
-                if (!request.HasFormContentType) return Results.BadRequest("Unsupported Media Type");
+                if (!request.HasFormContentType)
+                {
+                    app.Logger.LogDebug("Received status request with invalid media type");
+                    return Results.BadRequest("Unsupported Media Type");
+                }
                 
                 var form = await request.ReadFormAsync();
 
-                if (!CheckPassword(form["password"].ToString())) return Results.Unauthorized();
+                if (!CheckPassword(form["password"].ToString()))
+                {
+                    app.Logger.LogDebug("Received unauthorized status request");
+                    return Results.Unauthorized();
+                }
 
                 if (form["is error"] == "false")
                 {
-                    int remainingBenchmarks;
-                    int totalBenchmarks;
-                    if (!int.TryParse(form["remaining benchmarks"], out remainingBenchmarks)) return Results.BadRequest();
-                    if (!int.TryParse(form["total benchmark count"], out totalBenchmarks)) return Results.BadRequest();
-                    
-                    Console.WriteLine($"instance {form["instance name"]} running {form["benchmark project"]}: completed {totalBenchmarks-remainingBenchmarks}/{totalBenchmarks} {(form["estimated finish"].ToString() == string.Empty ? "" : $"estimated finish at {form["estimated finish"]}")}");
+                    if (!int.TryParse(form["remaining benchmarks"], out int remainingBenchmarks)) return Results.BadRequest();
+                    if (!int.TryParse(form["total benchmark count"], out int totalBenchmarks)) return Results.BadRequest();
+                    app.Logger.LogInformation($"instance {form["instance name"]} running {form["benchmark project"]}: completed {totalBenchmarks-remainingBenchmarks}/{totalBenchmarks} {(form["estimated finish"].ToString() == string.Empty ? "" : $"estimated finish at {form["estimated finish"]}")}");
                 }
                 else
                 {
-                    Console.WriteLine($"ERROR IN INSTANCE {form["instance name"]} while running {form["benchmark project"]}: {form["message"]}");
+                    app.Logger.LogInformation($"ERROR IN INSTANCE {form["instance name"]} while running {form["benchmark project"]}: {form["message"]}");
                 }
                 
                 return Results.Ok();
@@ -69,11 +83,19 @@ public class Program
         
         app.MapPost("/result", async (HttpRequest request) =>
             {
-                if (!request.HasFormContentType) return Results.BadRequest("Unsupported Media Type");
+                if (!request.HasFormContentType)
+                {
+                    app.Logger.LogDebug("Received result request with invalid media type");
+                    return Results.BadRequest("Unsupported Media Type");
+                }
                 
                 var form = await request.ReadFormAsync();
 
-                if (!CheckPassword(form["password"].ToString())) return Results.Unauthorized();
+                if (!CheckPassword(form["password"].ToString()))
+                {
+                    app.Logger.LogDebug("Received unauthorized result request");
+                    return Results.Unauthorized();
+                }
                 
                 if (form.Files["BenchmarkResults"] is { } file)
                 {
@@ -87,9 +109,11 @@ public class Program
                         await file.CopyToAsync(stream);
                     }
                     
-                    Console.WriteLine($"Received benchmark results for project {form["benchmark project"]} from instance {form["instance name"]}. Results are saved under {filePath}.");
+                    app.Logger.LogInformation($"Received benchmark results for project {form["benchmark project"]} from instance {form["instance name"]}. Results are saved under {filePath}.");
                     return Results.Ok();
                 }
+
+                app.Logger.LogDebug("Received result request with missing file");
                 return Results.BadRequest();
             })
             .WithName("PostResult")
