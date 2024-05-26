@@ -81,7 +81,13 @@ To make this script run at startup past it into the [User data](https://docs.aws
 Now you can deploy your EC2 instance and your benchmarks should run.
 
 ### The Server
-The server password is set in the appsettings.
+There are 2 extra settings in the appsettings:
+* **AuthenticationConfig.Password**\
+  Sets the password for the server. If not set the password will be "password12345".
+* **useSpectreConsole**\
+  This is a boolean and sets the console out put. 
+  If enabled the server console will show [Spectre.Console progress bars](https://spectreconsole.net/live/progress) instead of the regular console output.
+  Specifically, it sets the minimum log level for the console to error instead of info, except for Microsoft.Hosting.Lifetime logs, so that the startup info is still displayed.
 
 The server has the following endpoints:
 
