@@ -25,6 +25,8 @@ public class Program
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+
+        builder.Services.AddSingleton<INotificationService, NotificationService>();
         
         // NLog: Setup NLog for Dependency injection
         builder.Logging.ClearProviders();
@@ -81,7 +83,7 @@ public class Program
             .WithName("PostStatus")
             .WithOpenApi();
         
-        app.MapPost("/result", async (HttpRequest request) =>
+        app.MapPost("/result", async (INotificationService notificationService, HttpRequest request) =>
             {
                 if (!request.HasFormContentType)
                 {
@@ -109,6 +111,8 @@ public class Program
                     }
                     
                     app.Logger.LogInformation($"Received benchmark results for project {form["benchmark project"]} from instance {form["instance name"]}. Results are saved under {filePath}.");
+                    var desktopNotificationSuccessful = await notificationService.ShowNotification($"Instance {form["instance name"]} finished.", $"{form["instance name"]} finished project {form["benchmark project"]}. Results are saved under {filePath}.");
+                    if (!desktopNotificationSuccessful) app.Logger.LogWarning($"Desktop notification failed while logging result received from instance {form["instance name"]} with project {form["benchmark project"]}");
                     return Results.Ok();
                 }
 
