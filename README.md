@@ -81,7 +81,7 @@ To make this script run at startup past it into the [User data](https://docs.aws
 Now you can deploy your EC2 instance and your benchmarks should run.
 
 ### The Server
-The server password is set with the first console argument all other arguments are forwarded to ASP.NET web application builder.
+The server password is set in the appsettings.
 
 The server has the following endpoints:
 
