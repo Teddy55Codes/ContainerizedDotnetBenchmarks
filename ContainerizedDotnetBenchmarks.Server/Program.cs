@@ -12,6 +12,7 @@ public class Program
 {
     private static byte[] _serverPassword;
     private static bool _useSpectreConsole;
+    private static bool _useDesktopNotifications;
     
     public static void Main(string[] args)
     {
@@ -35,7 +36,9 @@ public class Program
             builder.Services.AddSingleton<IProgressService, ProgressService>();
         }
         
-        builder.Services.AddSingleton<INotificationService, NotificationService>();
+        // set if desktop notifications should be used.
+        _useDesktopNotifications = builder.Configuration.GetValue<bool>("useDesktopNotifications");
+        if (_useDesktopNotifications) builder.Services.AddSingleton<INotificationService, NotificationService>();
         
         // set password
         var authenticationConfig = builder.Configuration.GetSection("AuthenticationConfig").Get<AuthenticationConfig>();
@@ -118,7 +121,7 @@ public class Program
             .WithName("PostStatus")
             .WithOpenApi();
         
-        app.MapPost("/result", async ([FromServices] IProgressService? progressService, INotificationService notificationService, HttpRequest request) =>
+        app.MapPost("/result", async (HttpRequest request, [FromServices] IProgressService? progressService,  [FromServices] INotificationService? notificationService) =>
             {
                 if (!request.HasFormContentType)
                 {
@@ -146,8 +149,13 @@ public class Program
                     }
                     
                     app.Logger.LogInformation($"Received benchmark results for project {form["benchmark project"]} from instance {form["instance name"]}. Results are saved under {filePath}.");
-                    var desktopNotificationSuccessful = await notificationService.ShowNotification($"Instance {form["instance name"]} finished.", $"{form["instance name"]} finished project {form["benchmark project"]}. Results are saved under {filePath}.");
-                    if (!desktopNotificationSuccessful) app.Logger.LogWarning($"Desktop notification failed while logging result received from instance {form["instance name"]} with project {form["benchmark project"]}");
+                    
+                    if (notificationService is not null)
+                    {
+                        var desktopNotificationSuccessful = await notificationService.ShowNotification($"Instance {form["instance name"]} finished.", $"{form["instance name"]} finished project {form["benchmark project"]}. Results are saved under {filePath}.");
+                        if (!desktopNotificationSuccessful) app.Logger.LogWarning($"Desktop notification failed while logging result received from instance {form["instance name"]} with project {form["benchmark project"]}");
+                    }
+                    
                     if (progressService is not null) progressService.UpdateTask(
                         $"Instance: {form["instance name"]} Benchmark: {form["benchmark project"]}", 
                         "Uploaded", 
