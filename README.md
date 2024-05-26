@@ -15,7 +15,7 @@ This repository contains 2 projects [ContainerizedDotnetBenchmarks (the client)]
 ### The Client
 
 #### Build
-First you will need one or more BenchmarkDotnet benchmark projects. All of them need to share one parent directory which optimally should not be `/`. (=^ω^=)\
+First you will need one or more BenchmarkDotnet benchmark projects. All of them need to share one parent directory which optimally shouldn't be `/` or `C:\`. (=^ω^=)\
 After that you need to build the docker image. The dockerfile takes the following arguments:
 
 * **BUILD_CONFIGURATION**\
