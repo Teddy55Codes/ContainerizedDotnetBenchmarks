@@ -10,13 +10,6 @@ public class Program
     
     public static void Main(string[] args)
     {
-        if (args.Length < 1) _serverPassword = SHA256.HashData(Encoding.Unicode.GetBytes("password12345"));
-        else
-        {
-            _serverPassword = SHA256.HashData(Encoding.Unicode.GetBytes(args[0]));
-            args = args[1..];
-        }
-        
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
@@ -28,6 +21,11 @@ public class Program
 
         builder.Services.AddSingleton<INotificationService, NotificationService>();
         
+        // set password
+        var authenticationConfig = builder.Configuration.GetSection("AuthenticationConfig").Get<AuthenticationConfig>();
+
+        _serverPassword = SHA256.HashData(authenticationConfig is null ? Encoding.Unicode.GetBytes("password12345") : Encoding.Unicode.GetBytes(authenticationConfig.Password));
+
         // NLog: Setup NLog for Dependency injection
         builder.Logging.ClearProviders();
         builder.Host.UseNLog();
