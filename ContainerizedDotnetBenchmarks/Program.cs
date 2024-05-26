@@ -104,6 +104,7 @@ partial class Program
                 { "benchmark project", _currentProjectName },
                 { "message", consoleMessage },
                 { "remaining benchmarks", _currentBenchmarkTotalCount.ToString() },
+                { "current time", DateTime.Now.ToString("yyyy-MM-dd HH:mm") },
                 { "estimated finish", string.Empty },
                 { "total benchmark count", _currentBenchmarkTotalCount.ToString() },
                 { "is error", "false" }
@@ -135,6 +136,7 @@ partial class Program
             { "benchmark project", _currentProjectName },
             { "message", consoleMessage },
             { "remaining benchmarks", remainingBenchmarks },
+            { "current time", DateTime.Now.ToString("yyyy-MM-dd HH:mm") },
             { "estimated finish", estFinish },
             { "total benchmark count", _currentBenchmarkTotalCount.ToString() },
             { "is error", "false" }
