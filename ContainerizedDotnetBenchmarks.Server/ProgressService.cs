@@ -23,7 +23,7 @@ public class ProgressService : IProgressService
                 // Define tasks
                 OnUpdateTask += (name, description, value, maxValue, timeRemaining) =>
                 {
-                    var completeDescription = $"{name} | {description} | {value}/{maxValue} | {(timeRemaining == TimeSpan.Zero ? "NA" : timeRemaining.ToString("g"))}";
+                    var completeDescription = $"{name} | {description} | {(value is null || maxValue is null ? "NA" : $"{value}/{maxValue}")} | {(timeRemaining == TimeSpan.Zero ? "NA" : timeRemaining.ToString("g"))}";
                     var task = _activeClients.GetOrAdd(name, s => ctx.AddTask(completeDescription));
                     task.Description = completeDescription;
                     if (value is not null) task.Value = (double)value;
