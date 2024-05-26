@@ -86,7 +86,7 @@ There are 2 extra settings in the appsettings:
   Sets the password for the server. If not set the password will be "password12345".
 * **useSpectreConsole**\
   This is a boolean and sets the console out put. 
-  If enabled the server console will show [Spectre.Console progress bars](https://spectreconsole.net/live/progress) instead of the regular console output.
+  If enabled the server console will show [Spectre.Console progress bars](https://spectreconsole.net/live/progress) instead of the regular log output.
   Specifically, it sets the minimum log level for the console to error instead of info, except for Microsoft.Hosting.Lifetime logs, so that the startup info is still displayed.
 
 The server has the following endpoints:
